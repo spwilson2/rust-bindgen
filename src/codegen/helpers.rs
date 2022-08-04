@@ -163,7 +163,7 @@ pub mod ast_ty {
             Some(ref prefix) => {
                 let prefix = TokenStream::from_str(prefix.as_str()).unwrap();
                 quote! {
-                    #prefix::#ident
+                    #prefix#ident
                 }
             }
             None => quote! {
