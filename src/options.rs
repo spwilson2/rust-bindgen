@@ -395,6 +395,12 @@ where
             Arg::new("generate-inline-functions")
                 .long("generate-inline-functions")
                 .help("Generate inline functions."),
+            Arg::new("include-foundation-core")
+                .long("include-foundation-core")
+                .help("include-foundation-core"),
+            Arg::new("include-foundation")
+                .long("include-foundation")
+                .help("include-foundation"),
             Arg::new("allowlist-type")
                 .long("allowlist-type")
                 .alias("whitelist-type")

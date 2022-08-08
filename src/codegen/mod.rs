@@ -4113,7 +4113,9 @@ fn objc_method_codegen(
     let method_name =
         ctx.rust_ident(format!("{}{}", prefix, method.rust_name()));
 
+    //SPW - inline these, they should be quick?
     quote! {
+        #[inline]
         unsafe fn #method_name #sig where <Self as std::ops::Deref>::Target: objc::Message + Sized {
             #body
         }
@@ -4412,6 +4414,22 @@ pub mod utils {
         ctx: &BindgenContext,
         result: &mut Vec<proc_macro2::TokenStream>,
     ) {
+        let mut items = Vec::new();
+        //if ctx.options().include_foundation {
+        //    items.push(quote! {
+        //        use crate::foundation::{*};
+        //    });
+        //}
+        //if ctx.options().include_foundation_core {
+        //    items.push(quote! {
+        //        use crate::core_foundation::{*};
+        //    });
+        //}
+        if let Some(ref statement) = ctx.options().include_statement {
+            let statement: proc_macro2::TokenStream = statement.parse().unwrap();
+            items.push(statement);
+        }
+
         let use_objc = if ctx.options().objc_extern_crate {
             quote! {
                 #[macro_use]
@@ -4428,7 +4446,7 @@ pub mod utils {
             pub type id = *mut objc::runtime::Object;
         };
 
-        let items = vec![use_objc, id_type];
+        items.extend_from_slice(&[use_objc, id_type]);
         let old_items = mem::replace(result, items);
         result.extend(old_items.into_iter());
     }
@@ -4760,7 +4778,7 @@ pub mod utils {
                 };
 
                 let arg_name = match *name {
-                    Some(ref name) => ctx.rust_mangle(name).into_owned(),
+                    Some(ref name) => format!("{}_", ctx.rust_mangle(name)),
                     None => {
                         unnamed_arguments += 1;
                         format!("arg{}", unnamed_arguments)
